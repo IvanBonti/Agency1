@@ -1,21 +1,23 @@
 from pathlib import Path
 import os
+import environ
 
 env = environ.Env()
 environ.Env.read_env()
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-+o11ed848k%_hg=!v*b02v9rvqs8%1ia=1!+*z@(%+)@y7slo)'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG')
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS_DEV')
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -24,7 +26,35 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+
+PROJECT_APPS = [
+
+
+]
+
+
+THIRD_PARTY_APPS = [
+    'rest_framework',
+    'corsheaders',
+    'ckeditor',
+    'ckeditor_uploader',
+]
+
+
+INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
+
+ckeditor_config = {
+    'default': {
+        'toolbar': 'full',
+        'autoparagraph': False
+    }
+
+}
+
+CKEDITOR_UPLOAD_PATH = "/media/"
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -59,11 +89,11 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 
 # Password validation
@@ -108,3 +138,6 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+if not DEBUG:
+    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS_DEPLOY')
